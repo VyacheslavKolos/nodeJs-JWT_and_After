@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { authService } from '../services/authService';
+import { authService, tokenService } from '../services';
 
 class AuthController {
     public async registration(req:Request, res:Response) {
@@ -10,6 +10,14 @@ class AuthController {
             { maxAge: 24 * 60 * 60 * 1000, httpOnly: true },
         );
         return res.json(data);
+    }
+
+    public async logout(req:Request, res:Response): Promise<Response<string>> {
+
+        res.clearCookie('refreshToken');
+        await tokenService.deleteUserTokenPair(3);
+
+        return res.json('OK');
     }
 }
 
