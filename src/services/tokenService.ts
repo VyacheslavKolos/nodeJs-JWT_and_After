@@ -1,4 +1,4 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { config } from '../config/config';
 import { IToken } from '../entity/token';
 import { tokenRepository } from '../repositories/token/tokenRepository';
@@ -38,7 +38,7 @@ class TokenService {
     }
 
     async deleteUserTokenPair(userId: number) {
-        return tokenRepository.delete({ userId });
+        return tokenRepository.deleteByParams({ userId });
     }
 
     verifyToken(authToken: string, tokenType = 'access'): IUserPayload {

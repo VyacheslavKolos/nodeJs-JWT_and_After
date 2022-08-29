@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { tokenService, userService } from '../services';
 import { IRequestExtended } from '../interfaces/request-extended.interface';
 
@@ -13,6 +13,10 @@ class AuthMiddleware {
             const { userEmail } = tokenService.verifyToken(authToken);
 
             const userFromToken = await userService.getUserByEmail(userEmail);
+
+            if (!userFromToken) {
+                throw new Error('wrong token');
+            }
 
             req.user = userFromToken;
 

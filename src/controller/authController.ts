@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { authService, tokenService } from '../services';
+import { IRequestExtended } from '../interfaces/request-extended.interface';
+import { IUser } from '../entity/user';
 
 class AuthController {
     public async registration(req:Request, res:Response) {
@@ -12,10 +14,12 @@ class AuthController {
         return res.json(data);
     }
 
-    public async logout(req:Request, res:Response): Promise<Response<string>> {
+    public async logout(req:IRequestExtended, res:Response): Promise<Response<string>> {
+        const { id } = req.user as IUser;
 
         res.clearCookie('refreshToken');
-        await tokenService.deleteUserTokenPair(3);
+
+        await tokenService.deleteUserTokenPair(id);
 
         return res.json('OK');
     }
