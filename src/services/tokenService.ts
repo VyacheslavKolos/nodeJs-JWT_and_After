@@ -2,11 +2,10 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/config';
 import { IToken } from '../entity/token';
 import { tokenRepository } from '../repositories/token/tokenRepository';
-import { IUserPayload } from '../interfaces/token.interface';
+import { ITokenPair, IUserPayload } from '../interfaces';
 
 class TokenService {
-    public async generateTokenPair(payload: any):
-        Promise<{ accessToken: string, refreshToken: string }> {
+    public generateTokenPair(payload: IUserPayload): ITokenPair {
         const accessToken = jwt.sign(
             payload,
             config.SECRET_ACCESS_KEY as string,
@@ -24,14 +23,17 @@ class TokenService {
         };
     }
 
-    public async saveToken(userId: number, refreshToken: string): Promise<IToken> {
+    public async saveToken(userId: number, refreshToken: string, accessToken:string):
+        Promise<IToken> {
         const tokenFromDb = await tokenRepository.findTokenByUserId(userId);
         if (tokenFromDb) {
             tokenFromDb.refreshToken = refreshToken;
+            tokenFromDb.accessToken = accessToken;
             return tokenRepository.createToken(tokenFromDb);
         }
 
         return tokenRepository.createToken({
+            accessToken,
             refreshToken,
             userId,
         });

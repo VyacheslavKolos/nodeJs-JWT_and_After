@@ -6,6 +6,7 @@ import { User } from './user';
 
 export interface IToken{
     refreshToken: string;
+    accessToken:string;
     userId: number;
 }
 
@@ -17,6 +18,13 @@ export class Token extends CommonFields implements IToken {
         nullable: false,
     })
         refreshToken: string;
+
+    @Column({
+        type: 'varchar',
+        width: 250,
+        nullable: false,
+    })
+        accessToken: string;
 
     @Column({
         type: 'int',
