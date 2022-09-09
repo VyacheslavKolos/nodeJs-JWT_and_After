@@ -2,6 +2,7 @@ import { NextFunction, Response } from 'express';
 
 import { IRequestExtended } from '../interfaces';
 import { userRepository } from '../repositories/user/userRepository';
+import { ErrorHandler } from '../errors/ErrorHandler';
 
 class UserMiddleware {
     async checkIsUserExists(req: IRequestExtended, res: Response, next: NextFunction) {
@@ -9,15 +10,14 @@ class UserMiddleware {
             const userFromDb = await userRepository.getUserByEmail(req.body.email);
 
             if (!userFromDb) {
-                res.status(404).json('User not found');
+                next(new ErrorHandler('User not found', 404));
                 return;
             }
 
             req.user = userFromDb;
             next();
         } catch (e) {
-            res.status(400)
-                .json(e);
+            next(e);
         }
     }
 }

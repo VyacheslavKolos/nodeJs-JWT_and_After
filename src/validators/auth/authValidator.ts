@@ -10,7 +10,7 @@ export const authValidator = {
     login: {
         [Segments.BODY]: Joi.object({
             email: commonValidator.emailValidator,
-            password: Joi.string().required().min(8),
+            password: Joi.string().required().min(5),
             // cars: Joi.array().items(carSubSchema).min(2).max(90), // optional for example
         }),
     },
