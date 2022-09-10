@@ -16,7 +16,7 @@ router.use('*', (err, req, res, next) => {
     console.log('-----------------');
     console.log(err);
     console.log('-----------------');
-    res.status(err.code || 500).json({
+    res.status(err.status || 500).json({
         message: err.message,
     });
 });

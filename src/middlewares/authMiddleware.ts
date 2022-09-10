@@ -3,13 +3,16 @@ import { tokenService, userService } from '../services';
 import { IRequestExtended } from '../interfaces';
 import { tokenRepository } from '../repositories/token/tokenRepository';
 import { constants } from '../constants';
+import { authValidator } from '../validators';
+import { ErrorHandler } from '../errors/ErrorHandler';
 
 class AuthMiddleware {
     public async checkAccessToken(req: IRequestExtended, res:Response, next:NextFunction) {
         try {
             const accessToken = req.get(constants.AUTHORIZATION); // ('Authorization')
             if (!accessToken) {
-                throw new Error('No token');
+                next(new ErrorHandler('No token'));
+                return;
             }
 
             const { userEmail } = tokenService.verifyToken(accessToken);
@@ -17,13 +20,15 @@ class AuthMiddleware {
             const tokenPairFromDb = await tokenRepository.findByParams({ accessToken });
 
             if (!tokenPairFromDb) {
-                throw new Error('token not valid');
+                next(new ErrorHandler('Token not valid', 401));
+                return;
             }
 
             const userFromToken = await userService.getUserByEmail(userEmail);
 
             if (!userFromToken) {
-                throw new Error('token not valid');
+                next(new ErrorHandler('Token not valid', 401));
+                return;
             }
 
             req.user = userFromToken;
@@ -41,7 +46,8 @@ class AuthMiddleware {
         try {
             const refreshToken = req.get(constants.AUTHORIZATION); // ('Authorization')
             if (!refreshToken) {
-                throw new Error('No token');
+                next(new ErrorHandler('No token'));
+                return;
             }
 
             const { userEmail } = tokenService.verifyToken(refreshToken, 'refresh');
@@ -49,13 +55,15 @@ class AuthMiddleware {
             const tokenPairFromDb = await tokenRepository.findByParams({ refreshToken });
 
             if (!tokenPairFromDb) {
-                throw new Error('token not valid');
+                next(new ErrorHandler('Token not validd', 401));
+                return;
             }
 
             const userFromToken = await userService.getUserByEmail(userEmail);
 
             if (!userFromToken) {
-                throw new Error('token not valid');
+                next(new ErrorHandler('Token not valid', 401));
+                return;
             }
 
             req.user = userFromToken;
@@ -66,6 +74,23 @@ class AuthMiddleware {
                 status: 401,
                 message: e.message,
             });
+        }
+    }
+
+    // VALIDATORS
+    isLoginValid(req:IRequestExtended, res:Response, next:NextFunction) {
+        try {
+            const { error, value } = authValidator.login.validate(req.body);
+
+            if (error) {
+                next(new ErrorHandler(error.details[0].message));
+                return;
+            }
+
+            req.body = value;
+            next();
+        } catch (e) {
+            next(e);
         }
     }
 }

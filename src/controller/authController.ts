@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { authService, tokenService, userService } from '../services';
+import { authService, emailService, tokenService, userService } from '../services';
 import { IRequestExtended } from '../interfaces';
 import { IUser } from '../entity/user';
 import { tokenRepository } from '../repositories/token/tokenRepository';
@@ -34,6 +34,8 @@ class AuthController {
                 password: hashPassword,
             } = req.user as IUser;
             const { password } = req.body;
+
+            await emailService.sendMail(email);
 
             await userService.compareUserPasswords(password, hashPassword);
 
