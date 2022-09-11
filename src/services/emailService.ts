@@ -1,8 +1,11 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config/config';
+import { emailInfo, emailActionEnum } from '../constants';
 
 class EmailService {
-    sendMail(userEmail = '') {
+    sendMail(userEmail :string, action:emailActionEnum) {
+        const { subject, html } = emailInfo[action];
+
         const emailTransporter = nodemailer.createTransport({
             from: 'No reply kolosOk',
             service: 'gmail',
@@ -14,8 +17,8 @@ class EmailService {
 
         return emailTransporter.sendMail({
             to: userEmail,
-            subject: 'Hello world',
-            html: 'Hello this is mail',
+            subject,
+            html,
         });
     }
 }
